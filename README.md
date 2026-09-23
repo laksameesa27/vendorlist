@@ -1,4 +1,3 @@
-[vendor_dashboard (4).html](https://github.com/user-attachments/files/32555660/vendor_dashboard.4.html)
 <!DOCTYPE html>
 <html lang="th">
 <head>
