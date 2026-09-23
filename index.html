@@ -665,7 +665,6 @@
     <div class="top-row">
       <div>
         <h1>List of Sellers</h1>
-        <p>ค้นหา กรอง และเปรียบเทียบข้อมูลผู้ขายเพื่อประกอบการตัดสินใจจัดซื้อ</p>
       </div>
       <div class="top-row-actions">
         <button class="btn-export-all" id="exportAllBtn">Export Excel (ทั้งหมด)</button>
@@ -750,6 +749,15 @@
             <option value="IOT">IOT / IT Solution</option>
             <option value="Rent a Car">เช่ารถ</option>
             <option value="Air Ticket">ตั๋วเครื่องบิน</option>
+            <option value="Office Supplies">Office Supplies</option>
+            <option value="MRO">MRO - Maintenance, Repair, and Operations</option>
+            <option value="Outsource">Outsource</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Corporate Communications">Corporate Communications</option>
+            <option value="Appliance">Appliance</option>
+            <option value="Merchandise">Merchandise</option>
+            <option value="Uniform">Uniform</option>
+            <option value="Corporate Gifts">Corporate Gifts</option>
           </select>
         </label>
         <label class="form-field">
@@ -772,6 +780,10 @@
         <label class="form-field">
           <span>เครดิตเทอม</span>
           <input type="text" id="f-credit" placeholder="เช่น 30 หรือ New">
+        </label>
+        <label class="form-field">
+          <span>เลขที่ผู้เสียภาษี</span>
+          <input type="text" id="f-taxid" maxlength="20" placeholder="เลขประจำตัวผู้เสียภาษี 13 หลัก">
         </label>
         <label class="form-field">
           <span>ผู้ติดต่อ</span>
@@ -897,7 +909,7 @@ function getFiltered(){
   if(state.search.trim()){
     const q = state.search.trim().toLowerCase();
     rows = rows.filter(v => {
-      return [v.name, v.subcategory, v.contact, v.email, v.remark, v.tel]
+      return [v.name, v.subcategory, v.contact, v.email, v.remark, v.tel, v.taxId]
         .some(f => f && String(f).toLowerCase().includes(q));
     });
   }
@@ -966,6 +978,10 @@ function render(){
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
             ${v.email ? `<a href="mailto:${escapeHtml(v.email)}">${escapeHtml(v.email)}</a>` : '—'}
           </div>
+          <div class="vc-contact-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="12" y2="17"/></svg>
+            เลขผู้เสียภาษี ${escapeHtml(v.taxId || '—')}
+          </div>
         </div>
       </div>
     </div>`;
@@ -1031,6 +1047,7 @@ function openCompareModal(){
     { key: 'size', label: 'ขนาดกิจการ' },
     { key: 'capital', label: 'ทุนจดทะเบียน', fmt: fmtCapital },
     { key: 'credit', label: 'เครดิต', fmt: v => v ? v + ' วัน' : '—' },
+    { key: 'taxId', label: 'เลขผู้เสียภาษี' },
     { key: 'contact', label: 'ผู้ติดต่อ' },
     { key: 'tel', label: 'โทรศัพท์' },
     { key: 'email', label: 'อีเมล' },
@@ -1068,6 +1085,7 @@ function vendorsToWorkbook(vendors, singleSheet){
   const rowFor = (v, i) => ({
     'No.': i + 1,
     'Vendor Name': v.name || '',
+    'Tax ID': v.taxId || '',
     'Registered Capital': v.capital ?? '',
     'Size': v.size || '',
     'Credit': v.credit ?? '',
@@ -1079,7 +1097,7 @@ function vendorsToWorkbook(vendors, singleSheet){
     'Email': v.email || ''
   });
   const colWidths = [
-    {wch:5},{wch:38},{wch:16},{wch:6},{wch:10},{wch:14},{wch:16},{wch:45},{wch:16},{wch:16},{wch:26}
+    {wch:5},{wch:38},{wch:16},{wch:16},{wch:6},{wch:10},{wch:14},{wch:16},{wch:45},{wch:16},{wch:16},{wch:26}
   ];
 
   if(singleSheet){
@@ -1242,6 +1260,7 @@ function openVendorForm(id){
     document.getElementById('f-contact').value = v.contact || '';
     document.getElementById('f-tel').value = v.tel || '';
     document.getElementById('f-email').value = v.email || '';
+    document.getElementById('f-taxid').value = v.taxId || '';
     const lines = v.remark ? String(v.remark).split('\n').map(l => l.replace(/^-+\s*/,'').trim()).filter(Boolean) : [];
     document.getElementById('f-remark').value = lines.join('\n');
   } else {
@@ -1278,6 +1297,7 @@ function submitVendorForm(e){
     contact: document.getElementById('f-contact').value.trim() || null,
     tel: document.getElementById('f-tel').value.trim() || null,
     email: document.getElementById('f-email').value.trim() || null,
+    taxId: document.getElementById('f-taxid').value.trim() || null,
     remark
   };
 
